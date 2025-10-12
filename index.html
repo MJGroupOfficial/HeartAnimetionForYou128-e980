@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Heart Beat of Love 💖</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    height:100vh;width:100vw;
+    display:flex;justify-content:center;align-items:center;
+    background:radial-gradient(circle at center,#ffe6f2,#ffb6c1,#ff69b4);
+    overflow:hidden;font-family:"Poppins",sans-serif;
+  }
+  canvas{
+    width:90vw;height:80vh;max-width:600px;max-height:800px;
+    border-radius:20px;background:white;
+    box-shadow:0 0 40px rgba(255,20,147,.5);
+  }
+</style>
+</head>
+<body>
+<canvas id="loveCanvas"></canvas>
+<audio id="beat" loop>
+  <source src="./mp3/heartbeat.mp3" type="audio/mpeg" />
+</audio>
+
+<script>
+const herName = "128√e980 💖"; 
+const TEXT_DELAY_FRAMES = 400; 
+const canvas = document.getElementById("loveCanvas");
+const ctx = canvas.getContext("2d");
+const audio = document.getElementById("beat");
+
+let k = 0;
+let textAlpha = 0;
+let frameCount = 0; 
+let hearts = [];
+
+function resizeCanvas(){
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  hearts = Array.from({length: 25}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: 6 + Math.random() * 10,
+    speed: 0.3 + Math.random() * 0.5,
+    alpha: 0.2 + Math.random() * 0.8
+  }));
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+document.body.addEventListener("click", () => audio.play().catch(() => {}));
+
+function drawFloatingHearts(){
+  hearts.forEach(h => {
+    ctx.save();
+    ctx.globalAlpha = h.alpha;
+    ctx.fillStyle = "hotpink";
+    const s = h.size;
+    ctx.beginPath();
+    ctx.moveTo(h.x, h.y);
+    ctx.bezierCurveTo(h.x - s/2, h.y - s/2, h.x - s, h.y + s/3, h.x, h.y + s);
+    ctx.bezierCurveTo(h.x + s, h.y + s/3, h.x + s/2, h.y - s/2, h.x, h.y);
+    ctx.fill();
+    ctx.restore();
+    h.y -= h.speed;
+    if(h.y < -10){h.y = canvas.height + 10; h.x = Math.random() * canvas.width;}
+  });
+}
+
+function drawHeart(k){
+  const w = canvas.width, h = canvas.height;
+  const scale = Math.min(w, h) * 0.25 * (1 + 0.03 * Math.sin(k * 2)); 
+  const step = 0.01;
+  ctx.beginPath();
+  ctx.lineWidth = 3;
+  ctx.shadowColor = "deeppink";
+  ctx.shadowBlur = 20;
+  ctx.strokeStyle = "hotpink";
+  for(let x = -Math.sqrt(3); x <= Math.sqrt(3); x += step){
+    const y = Math.pow(Math.abs(x), 2/3) + 0.9 * Math.sin(k * x) * Math.sqrt(3 - x * x);
+    const cx = w/2 + x * scale;
+    const cy = h/2 - y * scale;
+    if(x === -Math.sqrt(3)) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+  }
+  ctx.stroke(); 
+  ctx.closePath();
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(255, 105, 180, 0.6)";
+  ctx.arc(w/2, h/2, 10 + Math.sin(k) * 3, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawText(){
+  const w = canvas.width, h = canvas.height;
+  ctx.save();
+  ctx.globalAlpha = textAlpha;
+  
+  const baseFont = Math.min(w * 0.08, 40);
+  const pulse = 1 + 0.05 * Math.sin(k * 2);
+  
+  ctx.font = `${baseFont * pulse}px Poppins`;
+  ctx.fillStyle = "deeppink";
+  ctx.textAlign = "center";
+  ctx.shadowColor = "deeppink";
+  ctx.shadowBlur = 20;
+  ctx.fillText(herName, w/2, h/2 - 50);
+
+  ctx.restore();
+}
+
+function animate(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  drawFloatingHearts();
+  drawHeart(k);
+  frameCount++;
+  if (frameCount >= TEXT_DELAY_FRAMES) {
+    if (textAlpha < 1) {
+      textAlpha += 0.01;
+    } else {
+      textAlpha = 1; 
+    }
+    drawText();
+  }
+  k += 0.04;
+  if(k > 150) k = 0;
+  
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
