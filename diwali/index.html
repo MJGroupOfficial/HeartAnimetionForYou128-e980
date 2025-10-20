@@ -99,15 +99,28 @@ function animate(){
   requestAnimationFrame(animate);
 }
 animate();
-setTimeout(()=>{
-  const bgm=document.getElementById("bgm");
-  bgm.play().catch(()=>{
-    document.body.addEventListener("click",()=>{
-      bgm.play();
-    },{once:true});
-  });
-},800);
+setTimeout(() => {
+  const bgm = document.getElementById("bgm");
+  let isPlaying = false;
 
+  // Try autoplay after 800ms
+  bgm.play().then(() => {
+    isPlaying = true;
+  }).catch(() => {
+    console.log("Autoplay blocked — waiting for user interaction");
+  });
+
+  // Toggle play/pause on click
+  document.body.addEventListener("click", () => {
+    if (isPlaying) {
+      bgm.pause();
+      isPlaying = false;
+    } else {
+      bgm.play().catch(() => {});
+      isPlaying = true;
+    }
+  });
+}, 800);
 
 </script>
 </body>
