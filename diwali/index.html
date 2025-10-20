@@ -42,61 +42,33 @@ const canvas=document.getElementById("fireworks");
 const ctx=canvas.getContext("2d");
 let w,h;function resize(){w=canvas.width=innerWidth;h=canvas.height=innerHeight}
 addEventListener("resize",resize);resize();
-class Firework {
-  constructor() {
-    this.reset();
+
+class Firework{
+  constructor(){this.reset()}
+  reset(){
+    this.x=Math.random()*w;
+    this.y=h;
+    this.targetY=Math.random()*h*0.5;
+    this.color=`hsl(${Math.random()*360},100%,60%)`;
+    this.particles=[];
+    this.size=2;
+    this.exploded=false;
   }
-  reset() {
-    this.x = Math.random() * w;
-    this.y = h;
-    this.targetY = Math.random() * h * 0.5;
-    this.color = `hsl(${Math.random() * 360},100%,60%)`;
-    this.particles = [];
-    this.exploded = false;
-    this.nameVisible = false;
-    this.nameAlpha = 0;
-  }
-  update() {
-    if (!this.exploded) {
-      this.y -= 5;
-      if (this.y <= this.targetY) {
-        this.exploded = true;
-        // create particles
-        for (let i = 0; i < 40; i++) {
-          this.particles.push(new Particle(this.x, this.y, this.color));
-        }
-        // show name sometimes (about 40% chance)
-        if (Math.random() < 0.4) {
-          this.nameVisible = true;
-        }
-      }
-    } else {
-      this.particles.forEach(p => p.update());
-      this.particles = this.particles.filter(p => p.alpha > 0);
-      if (this.nameVisible && this.nameAlpha < 1) this.nameAlpha += 0.02;
-      if (!this.particles.length) this.reset();
+  update(){
+    if(!this.exploded){
+      this.y-=5;
+      if(this.y<=this.targetY){this.exploded=true;for(let i=0;i<40;i++){this.particles.push(new Particle(this.x,this.y,this.color))}}
+    }else{
+      this.particles.forEach(p=>p.update());
+      this.particles=this.particles.filter(p=>p.alpha>0);
+      if(!this.particles.length)this.reset();
     }
   }
-  draw() {
-    if (!this.exploded) {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, 2, 0, 2 * Math.PI);
-      ctx.fillStyle = this.color;
-      ctx.fill();
-    } else {
-      this.particles.forEach(p => p.draw());
-      if (this.nameVisible) {
-        ctx.save();
-        ctx.globalAlpha = this.nameAlpha;
-        ctx.font = "bold 26px Poppins";
-        ctx.fillStyle = "pink";
-        ctx.shadowColor = "deeppink";
-        ctx.shadowBlur = 20;
-        ctx.textAlign = "center";
-        ctx.fillText("128√e980 💖", this.x, this.y - 20);
-        ctx.restore();
-      }
-    }
+  draw(){
+    if(!this.exploded){
+      ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,2*Math.PI);
+      ctx.fillStyle=this.color;ctx.fill();
+    }else this.particles.forEach(p=>p.draw());
   }
 }
 
