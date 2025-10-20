@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Happy Diwali Everyone 🎇</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:radial-gradient(circle at bottom,#000010,#120020,#240040);
+  overflow:hidden;height:100vh;width:100vw;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  color:#fff;font-family:"Poppins",sans-serif;text-align:center
+}
+h1{
+  font-size:clamp(1.8rem,5vw,3rem);
+  color:#ffb6c1;text-shadow:0 0 15px #ff69b4;
+  animation:glow 2s ease-in-out infinite alternate
+}
+h2{
+  margin-top:10px;
+  font-size:clamp(1rem,3vw,1.5rem);
+  color:#ffe6f2;
+  opacity:0;animation:fadeIn 4s ease forwards 3s
+}
+@keyframes glow{from{text-shadow:0 0 10px #ff69b4}to{text-shadow:0 0 30px #ff1493}}
+@keyframes fadeIn{to{opacity:1}}
+canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1}
+</style>
+</head>
+<body>
+<canvas id="fireworks"></canvas>
+<h1>Happy Diwali Everyone 🎇</h1>
+<h2>Today Light is Everywhere</h2>
+
+<audio id="bgm" loop>
+ <source src="fireworks.mp3" type="audio/mpeg">
+</audio>
+<script>
+// simple fireworks
+const canvas=document.getElementById("fireworks");
+const ctx=canvas.getContext("2d");
+let w,h;function resize(){w=canvas.width=innerWidth;h=canvas.height=innerHeight}
+addEventListener("resize",resize);resize();
+
+class Firework{
+  constructor(){this.reset()}
+  reset(){
+    this.x=Math.random()*w;
+    this.y=h;
+    this.targetY=Math.random()*h*0.5;
+    this.color=`hsl(${Math.random()*360},100%,60%)`;
+    this.particles=[];
+    this.size=2;
+    this.exploded=false;
+  }
+  update(){
+    if(!this.exploded){
+      this.y-=5;
+      if(this.y<=this.targetY){this.exploded=true;for(let i=0;i<40;i++){this.particles.push(new Particle(this.x,this.y,this.color))}}
+    }else{
+      this.particles.forEach(p=>p.update());
+      this.particles=this.particles.filter(p=>p.alpha>0);
+      if(!this.particles.length)this.reset();
+    }
+  }
+  draw(){
+    if(!this.exploded){
+      ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,2*Math.PI);
+      ctx.fillStyle=this.color;ctx.fill();
+    }else this.particles.forEach(p=>p.draw());
+  }
+}
+
+class Particle{
+  constructor(x,y,color){
+    this.x=x;this.y=y;this.color=color;
+    this.velX=(Math.random()-0.5)*6;
+    this.velY=(Math.random()-0.5)*6;
+    this.alpha=1;this.size=2+Math.random()*2;
+  }
+  update(){
+    this.x+=this.velX;this.y+=this.velY;
+    this.velY+=0.05;this.alpha-=0.02;
+  }
+  draw(){
+    ctx.globalAlpha=this.alpha;
+    ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,2*Math.PI);
+    ctx.fillStyle=this.color;ctx.fill();
+    ctx.globalAlpha=1;
+  }
+}
+
+let fireworks=Array.from({length:6},()=>new Firework());
+function animate(){
+  ctx.fillStyle="rgba(0,0,0,0.2)";
+  ctx.fillRect(0,0,w,h);
+  fireworks.forEach(f=>{f.update();f.draw()});
+  requestAnimationFrame(animate);
+}
+animate();
+
+setTimeout(()=>{
+  const bgm=document.getElementById("bgm");
+  bgm.play().catch(()=>{
+    document.body.addEventListener("click",()=>{
+      bgm.play();
+    },{once:true});
+  });
+},800);
+</script>
+</body>
+</html>
